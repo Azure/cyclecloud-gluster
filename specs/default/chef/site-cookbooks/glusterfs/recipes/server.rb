@@ -40,12 +40,21 @@ jetpack_log "Organizing gluster node: #{node['hostname']}, #{node['azure']['meta
   level "info"
 end
 
-ghosts = node['glusterfs']['fqdns'].dup
+if node['platform'] == "redhat"
+  ghosts = node['glusterfs']['fqdns'].dup
+else
+  ghosts = node['glusterfs']['hostnames'].dup
+end
+
 Chef::Log.info("Full server list = #{ghosts}")
 drop = ghosts.pop
 Chef::Log.info("Peer servers = #{ghosts}")
 
-all_ghosts = "#{node['fqdn']}:#{node['glusterfs']['drive']}"
+if node['platform'] == "redhat"
+  all_ghosts = "#{node['fqdn']}:#{node['glusterfs']['drive']}"
+else
+  ghosts = "#{node['hostname']}:#{node['glusterfs']['drive']}"
+end
 Chef::Log.info("all_ghosts = #{ghosts}")
 ghosts.each do |ghost|
   all_ghosts << " #{ghost}:#{node['glusterfs']['drive']}"
