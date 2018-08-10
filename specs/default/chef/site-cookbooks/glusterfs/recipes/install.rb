@@ -3,7 +3,6 @@
 bootstrap = node['cyclecloud']['bootstrap']
 
 execute 'rhel subscription' do
-  #command "gluster volume create #{vol_name} replica 2 transport tcp \"#{all_ghosts}\" 2>> /tmp/error && touch #{bootstrap}/gluster.volume.created"
   command "subscription-manager register --username=#{node['rhel']['subscription']['username']} --password=#{node['rhel']['subscription']['password']} || subscription-manager register --activationkey=#{node['rhel']['subscription']['activation_key']} --org=#{node['rhel']['subscription']['org']} && touch #{bootstrap}/rhel-subscription.done"
   not_if { ::File.exist?("#{bootstrap}/rhel-subscription.done") }
   only_if { node['platform'] == "redhat" }

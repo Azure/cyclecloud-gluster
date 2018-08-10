@@ -17,7 +17,7 @@ installation failures with recovery are expected.
 
 ## Configuration
 
-Nodes in the GlusterFS cluster are configured to have on brick per node. This brick is a RAID array with 8 drives and level 0.  The user can configure the size of these drives and whether
+Nodes in the GlusterFS cluster are configured to have one brick per node. This brick is a RAID array with 8 drives and level 0.  The user can configure the size of these drives and whether
 to use premium disk or not, but the quantity is fixed at 8.
 
 The cluster creates the gluster volume from the bricks according to
@@ -66,7 +66,7 @@ the mount to a failover node in case of node failure.
 
 ## Start a GlusterFS Client
 
-1. Import the cluster as a service offering `cyclecloud import_cluster GlusterFS-client -f glusterfs-client.txt -t`
+1. Import the cluster as a service offering `cyclecloud import_cluster GlusterFS-client -f examples/glusterfs-client.txt -t`
 1. Add the cluster to your managed cluster list in the CycleCloud UI with the _+add cluster_ button.
 1. In the GlusterFS Cluster dropdown choose the name of the GlusterFS cluster started in the previous section.
 

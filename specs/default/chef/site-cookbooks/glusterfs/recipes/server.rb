@@ -23,7 +23,7 @@ else
 end
 
 Chef::Log.info("Do we have quorum live_count=#{node['glusterfs']['live_count']}, target_count=#{node['glusterfs']['target_count']}")
-raise "No master quorum. Live Count = #{node['glusterfs']['live_count']}, Target Count = #{node['glusterfs']['target_count']}" if node['glusterfs']['live_count'] != node['glusterfs']['target_count']
+raise "No glusterfs quorum. Live Count = #{node['glusterfs']['live_count']}, Target Count = #{node['glusterfs']['target_count']}" if node['glusterfs']['live_count'] != node['glusterfs']['target_count']
 
 ruby_block 'host_not_ready' do
   block do
@@ -53,7 +53,7 @@ Chef::Log.info("Peer servers = #{ghosts}")
 if node['platform'] == "redhat"
   all_ghosts = "#{node['fqdn']}:#{node['glusterfs']['drive']}"
 else
-  ghosts = "#{node['hostname']}:#{node['glusterfs']['drive']}"
+  all_ghosts = "#{node['hostname']}:#{node['glusterfs']['drive']}"
 end
 Chef::Log.info("all_ghosts = #{ghosts}")
 ghosts.each do |ghost|
@@ -71,9 +71,8 @@ EOH
 end
 
 execute 'create_gluster_volume' do
-  #command "gluster volume create #{vol_name} replica 2 transport tcp \"#{all_ghosts}\" 2>> /tmp/error && touch #{bootstrap}/gluster.volume.created"
-  command "yes | gluster volume create #{vol_name} #{arg1} #{arg2} transport tcp #{all_ghosts} 2>> /tmp/error && touch #{bootstrap}/gluster.volume.created"
-  not_if { ::File.exist?("#{bootstrap}/gluster.volume.created") }
+  command "yes | gluster volume create #{vol_name} #{arg1} #{arg2} transport tcp #{all_ghosts} force 2>> /tmp/glusterfs_error "
+  not_if "gluster volume info #{node['glusterfs']['volume']['name']}"
 end
 
 bash "configure_gluster_cluster" do

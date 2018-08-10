@@ -20,22 +20,19 @@ if node['glusterfs'][:hostname].nil?
     end
   end
 
-  raise "No master nodes found." if cluster_nodes.length == 0
-
-  #node.default['glusterfs']['target_count'] = 4
+  raise "No glusterfs nodes found." if cluster_nodes.length == 0
   node.default['glusterfs']['live_count'] = cluster_nodes.length
 
-  #cluster_nodes_sorted = cluster_nodes.sort_by{ |x| x['hostname'] }
   cluster_nodes_sorted = cluster_nodes.sort_by{ |x| get_hostname(x['ipaddress']) }
 
-  Chef::Log.info("Found Master Hostnames = #{ cluster_nodes_sorted.map{|x| x['hostname']}}")
-  Chef::Log.info("Found Master Hostnames = #{ cluster_nodes_sorted.map{|x| get_hostname(x['ipaddress'])}}")
-  #node.default['glusterfs']['hostnames'] = cluster_nodes_sorted.map{|x| x['hostname']}
+  Chef::Log.info("Found GlusterFS Hostnames = #{ cluster_nodes_sorted.map{|x| x['hostname']}}")
+  Chef::Log.info("Found Reverse Hostnames = #{ cluster_nodes_sorted.map{|x| get_hostname(x['ipaddress'])}}")
+
   node.default['glusterfs']['reverse_hostnames'] = cluster_nodes_sorted.map{|x| get_hostname(x['ipaddress'])}
   node.default['glusterfs']['hostnames'] = cluster_nodes_sorted.map{|x| x['hostname']}
   node.default['glusterfs']['fqdns'] = cluster_nodes_sorted.map{|x| x['fqdn']}
   
-  Chef::Log.info("Found Master IPs = #{ cluster_nodes_sorted.map{|x| x['ipaddress']}}")
+  Chef::Log.info("Found GlusterFS IPs = #{ cluster_nodes_sorted.map{|x| x['ipaddress']}}")
   node.default['glusterfs']['ip_addresses'] =  cluster_nodes_sorted.map{|x| x['ipaddress']}
 
 end

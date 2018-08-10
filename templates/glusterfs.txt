@@ -13,15 +13,7 @@
     [[nodearray gluster]]
       MachineType = $MachineType
 
-      Azure.Publisher = OpenLogic
-      Azure.Offer = CentOS
-      Azure.Sku = 7.4
-      Azure.ImageVersion = latest
-      InstallJetpack = True
-      Azure.OS = linux
-      AwaitInstallation = true
-      JetpackVersion = 7.5.0
-      JetpackPlatform = centos-7
+      ImageName = cycle.image.centos7
       InitialCount = $ClusterSize
 
       AdditionalClusterInitSpecs = $GlusterClusterInitSpecs
@@ -33,6 +25,7 @@
         glusterfs.volume.type = $GlusterVolumeType
 
         [[[cluster-init glusterfs:default:$GlusterFSProjectVersion]]]
+        [[[cluster-init glusterfs:server-test:$GlusterFSProjectVersion]]]
 
         [[[volume d0]]]
         Size = $VolSize
@@ -90,7 +83,7 @@
         cyclecloud.discoverable = true
 
       [[[network-interface eth0]]]
-      AssociatePublicIpAddress = true
+      AssociatePublicIpAddress = $UsePublicNetwork
 
       [[[input-endpoint ganglia]]]
       PrivatePort = 8652
