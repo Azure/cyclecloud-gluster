@@ -1,0 +1,65 @@
+[cluster glusterfs-client]
+  Category = Infrastructure
+    [[node glusterfs-client]]
+        IsReturnProxy = True
+        MachineType = $MachineType
+        SubnetId = $SubnetId
+        ImageName = cycle.image.centos7
+        KeyPairLocation = ~/.ssh/cyclecloud.pem
+
+    [[[cluster-init glusterfs:default:latest]]]
+
+    [[[configuration]]]
+        run_list = recipe[glusterfs::client]
+        cyclecloud.discoverable = true
+
+    [[[configuration gluster.fs.mounts.example]]]
+        mount_point = /mnt/example
+        clusterUID = $GlusterCluster
+
+    [[[network-interface eth0]]]
+        AssociatePublicIpAddress = true
+
+    [[[input-endpoint SSH]]]
+        PrivatePort = 22
+        PublicPort = 22
+
+[parameters All Settings]
+
+    [[parameters Gluster]]
+    Description = Configurations for GlusterFS Cluster.
+    Order = 30
+
+    [[[parameter GlusterCluster]]]
+    Label = Gluster Cluster
+    Description = Name of desired GlusterFS Cluster
+    Config.Plugin = pico.form.QueryDropdown
+    Config.Query = '''select ClusterName as Name from Cloud.Cluster where state === "started" '''
+
+    [[[parameter SubnetId]]]
+    Label = Subnet ID
+    Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
+    ParameterType = Azure.Subnet
+    Required = True
+
+    [[parameters Azure]]
+    Description = Configurations for GlusterFS Cluster.
+    Order = 40
+
+    [[[parameter Credentials]]]
+    Description = The credentials for the cloud provider
+    ParameterType = Cloud.Credentials
+
+    [[[parameter Region]]]
+    Label = Region
+    Description = Deployment Location
+    ParameterType = Cloud.Region
+    DefaultValue = westus2
+
+    [[[parameter MachineType]]]
+    Label = vFXT VM Size
+    Description = VM Size for vFXT cluster nodes
+    DefaultValue = Standard_D2_v3        
+    ParameterType = Cloud.MachineType
+
+

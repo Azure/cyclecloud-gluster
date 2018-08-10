@@ -1,0 +1,178 @@
+[cluster glusterfs]
+  Category = FileSystem
+
+  [[node defaults]]
+
+    Credentials = $Credentials
+    Region = $Region
+    #MachineType = Standard_D2_v3
+
+    KeypairLocation = ~/.ssh/cyclecloud.pem
+    SubnetId = $SubnetId
+
+    [[node defaults]]
+
+      ImageId = $ImageId      
+      InstallJetpack = True
+      ImageOS = linux
+      AwaitInstallation = true
+      JetpackVersion = 7.5.0
+      JetpackPlatform = centos-7
+
+      [[[configuration]]]
+        #cyclecloud.cluster.user.name = hpcadmin
+        cyclecloud.hosts.standalone_dns.subnets = 10.0.4.0/24,
+        cyclecloud.hosts.standalone_dns.alt_suffix = $DNSSuffix
+        cyclecloud.selinux.policy = permissive
+
+    [[node fs]]
+      ImageId := undefined
+      ImageName = cycle.image.centos7
+      MachineType = $MonitorMachineType
+      [[[configuration]]]
+        cyclecloud.discoverable = true
+        run_list = recipe[cshared::directories],recipe[cuser],recipe[cshared::server],recipe[cganglia::server]
+
+    [[node monitor]]
+      MachineType = $MonitorMachineType
+      [[[configuration]]]
+        cyclecloud.discoverable = true
+        run_list = recipe[cshared::client],recipe[cuser],recipe[cganglia::client]
+
+    [[nodearray gluster]]
+      MachineType = $MachineType
+
+      #Azure.Publisher = OpenLogic
+      #Azure.Offer = CentOS
+      #Azure.Sku = 7.4
+      #Azure.ImageVersion = latest
+
+      Azure.SinglePlacementGroup=True
+      InitialCount = $ClusterSize
+      
+        [[[configuration]]]
+        run_list = recipe[glusterfs::server],recipe[cshared::client],recipe[cuser],recipe[cganglia::client]
+        cyclecloud.discoverable = true
+
+        rhel.subscription.username = 
+        rhel.subscription.password = 
+
+        [[[cluster-init glusterfs:default:$ProjectVersion]]]
+
+        [[[volume d0]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d1]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d2]]]
+        Size = 512
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d3]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d4]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d5]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d6]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[volume d7]]]
+        Size = $VolSize
+        SSD = true
+        Mount = ddrive
+
+        [[[configuration cyclecloud.mounts.ddrive]]]
+            mountpoint = /datadrive
+            fs_type = xfs
+            raid_level = 0
+
+[parameters ALL]
+
+    [[parameter Credentials]]
+    Description = The credentials for the cloud provider
+    ParameterType = Cloud.Credentials
+
+    [[parameter Region]]
+    Label = Region
+    Description = Deployment Location
+    ParameterType = Cloud.Region
+    DefaultValue = westus2
+
+    [[parameter MonitorMachineType]]
+    Label = Monitor VM Size
+    Description = VM Size for Monitor
+    DefaultValue = Standard_D4_v3        
+    ParameterType = Cloud.MachineType
+
+    [[parameter MachineType]]
+    Label = Gluster VM Size
+    Description = VM Size for vFXT gluster nodes
+    DefaultValue = Standard_D8s_v3        
+    ParameterType = Cloud.MachineType
+
+    [[parameter ImageId]]
+    Label = Gluster Image
+    Description = Resource ID for vm image
+    DefaultValue = /subscriptions/5/resourceGroups/scaleout/providers/Microsoft.Compute/images/rhel-gluster-image   
+
+
+    [[parameter ClusterSize]]
+    Label = VM Count
+    Description = Gluster Cluster Size
+    DefaultValue = 4
+    Config.Plugin = pico.form.NumberTextBox
+    Config.MinValue = 3
+    Config.MaxValue = 8
+    Config.IntegerOnly = true
+
+    [[parameter SubnetId]]
+    Label = Subnet ID
+    Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
+    ParameterType = Azure.Subnet
+    Required = True
+
+    [[parameter DNSSuffix]]
+    Label = Psuedo Domain
+    Description = Domain name for servers
+    DefaultValue = eda.local
+
+    [[parameter ProjectVersion]]
+    Label = Gluster Project
+    Description = Gluster Project Version Number
+    DefaultValue = 1.7.0
+
+    [[parameter VolCount]]
+    Label = Disks per VM
+    Description = Number of disk assembled into RAID
+    DefaultValue = 8
+    Config.Plugin = pico.form.NumberTextBox
+    Config.MinValue = 8
+    Config.MaxValue = 8
+    Config.IntegerOnly = true
+
+    [[parameter VolSize]]
+    Label = Volume Size GB
+    Description = RAID Single Vol x4
+    DefaultValue = 512
+    Config.Plugin = pico.form.NumberTextBox
+    Config.MinValue = 256
+    Config.MaxValue = 4095
+    Config.IntegerOnly = true
