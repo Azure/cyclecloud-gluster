@@ -11,7 +11,9 @@ mounts.each do |name, mount|
   if mount['hostnames'].nil?
     cluster_UID = mount['clusterUID']
     if cluster_UID.nil?
-      cluster_UID = node[:cyclecloud][:cluster][:id]
+      Chef::Log.info("hostnames and clusterUID undefined for #{name}, not mounting.")
+      return
+      #cluster_UID = node[:cyclecloud][:cluster][:id]
     end
 
     node_role = mount['role']

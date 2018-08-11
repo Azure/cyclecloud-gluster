@@ -1,5 +1,5 @@
 [cluster glusterfs]
-  Category = Infrastructure
+  Category = Filesystem 
   FormLayout = selectionpanel
   [[node defaults]]
 
@@ -73,7 +73,7 @@
             raid_level = 0
 
     [[node proxy]]
-      IsReturnProxy = True
+      IsReturnProxy = $ReturnProxy
       MachineType = $ProxyMachineType
       SubnetId = $SubnetId
       ImageName = cycle.image.centos7
@@ -83,15 +83,11 @@
         cyclecloud.discoverable = true
 
       [[[network-interface eth0]]]
-      AssociatePublicIpAddress = $UsePublicNetwork
+      AssociatePublicIpAddress = $ReturnProxy
 
       [[[input-endpoint ganglia]]]
       PrivatePort = 8652
       PublicPort = 8652
-
-      [[[input-endpoint SSH]]]
-      PrivatePort = 22
-      PublicPort = 22
 
 
 [parameters Required Settings]
@@ -106,6 +102,28 @@ Order = 10
         Description = Deployment Location
         ParameterType = Cloud.Region
 
+
+
+    [[parameters Networking]]
+    Description = Networking settings
+    Order = 40
+
+        [[[parameter SubnetId]]]
+        Label = Subnet
+        Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
+        Required = true
+        ParameterType = Azure.Subnet
+
+[parameters Advanced Settings]
+Order = 20
+
+    [[parameters Azure Settings]]
+    Order = 10 
+
+        [[[parameter Credentials]]]
+        Description = The credentials for the cloud provider
+        ParameterType = Cloud.Credentials
+
     [[parameters Machine Configurations]]
     Description = VM sizes for cluster
     Order = 20
@@ -115,23 +133,6 @@ Order = 10
       Description = VM Size for GlusterFS cluster nodes
       DefaultValue = Standard_D8s_v3        
       ParameterType = Cloud.MachineType
-
-
-      [[[parameter VolSize]]]
-      Label = Size (GB)
-      Description = FileServer Constituent RAID Volume Size (Count: 8)
-      DefaultValue = 200
-      Config.Plugin = pico.form.NumberTextBox
-      Config.MinValue = 20
-      Config.MaxValue = 4095
-      Config.IntegerOnly = true
-
-      [[[parameter UseSSD]]]
-      Label = SSD drives
-      DefaultValue = true
-      ParameterType = Boolean
-      Config.Label = Use Premium Managed Disks
-
 
     [[parameters GlusterFS Volume ]]
     Description = Configurations for GlusterFS Volume.
@@ -160,27 +161,21 @@ Order = 10
           Name = stripe
           Label = Striped
 
+      [[[parameter VolSize]]]
+      Label = Size (GB)
+      Description = FileServer Constituent RAID Volume Size (Count: 8)
+      DefaultValue = 200
+      Config.Plugin = pico.form.NumberTextBox
+      Config.MinValue = 20
+      Config.MaxValue = 4095
+      Config.IntegerOnly = true
 
+      [[[parameter UseSSD]]]
+      Label = SSD drives
+      DefaultValue = true
+      ParameterType = Boolean
+      Config.Label = Use Premium Managed Disks
 
-    [[parameters Networking]]
-    Description = Networking settings
-    Order = 40
-
-        [[[parameter SubnetId]]]
-        Label = Subnet
-        Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
-        Required = true
-        ParameterType = Azure.Subnet
-
-[parameters Advanced Settings]
-Order = 20
-
-    [[parameters Azure Settings]]
-    Order = 10 
-
-        [[[parameter Credentials]]]
-        Description = The credentials for the cloud provider
-        ParameterType = Cloud.Credentials
 
     [[parameters Software]]
     Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
@@ -213,8 +208,3 @@ Order = 20
         ParameterType = Boolean
         Config.Label = Use SSH tunnel to connect to CycleCloud (required if direct access is blocked)
 
-        [[[parameter UsePublicNetwork]]]
-        Label = Public Head Node
-        DefaultValue = true
-        ParameterType = Boolean
-        Config.Label = Access master node from the Internet

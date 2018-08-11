@@ -13,7 +13,7 @@
         run_list = recipe[glusterfs::client]
         cyclecloud.discoverable = true
 
-    [[[configuration gluster.fs.mounts.example]]]
+    [[[configuration glusterfs.mounts.example]]]
         mount_point = /mnt/example
         clusterUID = $GlusterCluster
 

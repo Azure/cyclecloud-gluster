@@ -12,6 +12,11 @@ search_target = "Gluster Servers"
 mounts.each do |name, mount|
 
   Chef::Log.info("Processing name,mount = #{name},#{mount}")
+  if mount['hostnames'].nil?
+    Chef::Log.info("hostnames not defined form glusterfs mount #{name}, ignoring.")
+    return
+  end
+
   ghosts = mount['hostnames'].dup
   ghost_prime = mount['hostnames'].sample
   ghosts.delete(ghost_prime)

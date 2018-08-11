@@ -52,11 +52,11 @@ The following example shows how you would configure a single client to mount
 two different GlusterFS clusters by referring to them by their cluster name.
 
 ```
-    [[[configuration gluster.fs.mounts.example]]]
+    [[[configuration glusterfs.mounts.example]]]
         mount_point = /mnt/example
         clusterUID = my-gluster-cluster
 
-    [[[configuration gluster.fs.mounts.tools]]]
+    [[[configuration glusterfs.mounts.tools]]]
         mount_point = /mnt/tools
         clusterUID = my-tools-gluster-cluster
 ```
