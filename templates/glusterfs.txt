@@ -1,5 +1,5 @@
 [cluster glusterfs]
-  Category = Filesystem 
+  Category = Filesystems
   FormLayout = selectionpanel
   [[node defaults]]
 
@@ -83,7 +83,7 @@
         cyclecloud.discoverable = true
 
       [[[network-interface eth0]]]
-      AssociatePublicIpAddress = $ReturnProxy
+      AssociatePublicIpAddress = $UsePublicNetwork
 
       [[[input-endpoint ganglia]]]
       PrivatePort = 8652
@@ -208,3 +208,8 @@ Order = 20
         ParameterType = Boolean
         Config.Label = Use SSH tunnel to connect to CycleCloud (required if direct access is blocked)
 
+        [[[parameter UsePublicNetwork]]]
+        Label = Public Proxy Node
+        DefaultValue = true
+        ParameterType = Boolean
+        Config.Label = Access proxy node from the Internet
