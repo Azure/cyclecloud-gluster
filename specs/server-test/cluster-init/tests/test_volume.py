@@ -12,7 +12,7 @@ def test_verify_volume():
 
     while True:
         try:
-            subprocess.check_call(["gluster", "volume", "info", volume_name])
+            subprocess.check_call(["/usr/sbin/gluster", "volume", "info", volume_name])
             return
         except subprocess.CalledProcessError:
             if time.time() < deadline:
