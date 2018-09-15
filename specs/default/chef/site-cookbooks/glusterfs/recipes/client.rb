@@ -23,7 +23,7 @@ mounts.each do |name, mount|
   log "Randomly chose: #{ghost_prime}, from: #{mount['hostnames']}" do level :info end
   backup_nodes = ghosts.join(":")
 
-  mount_point =  node['mount_point'].nil? ? "/mnt/#{name}" : mount['mount_point']
+  mount_point =  mount['mount_point'].nil? ? "/mnt/#{name}" : mount['mount_point']
 
   directory mount_point
   mount mount_point do
