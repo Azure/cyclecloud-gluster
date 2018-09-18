@@ -1,6 +1,6 @@
-include_recipe 'glusterfs::install'
-include_recipe 'glusterfs::config_gluster'
-include_recipe 'glusterfs::search_gluster'
+include_recipe '::install'
+include_recipe '::config_gluster'
+include_recipe '::search_gluster'
 
 bootstrap = node['cyclecloud']['bootstrap']
 
@@ -21,6 +21,8 @@ else
   arg1 = ''
   arg2 = ''
 end
+
+include_recipe '::selinux'
 
 Chef::Log.info("Do we have quorum live_count=#{node['glusterfs']['live_count']}, target_count=#{node['glusterfs']['target_count']}")
 raise "No glusterfs quorum. Live Count = #{node['glusterfs']['live_count']}, Target Count = #{node['glusterfs']['target_count']}" if node['glusterfs']['live_count'] != node['glusterfs']['target_count']
@@ -92,4 +94,5 @@ touch #{bootstrap}/gluster.volume.configured
 EOH
 not_if { ::File.exist?("#{bootstrap}/gluster.volume.configured") }
 end
-  
+
+#include_recipe '::tendrl' if node['platform'] == "redhat" && node['glusterfs']['monitoring']['enabled']

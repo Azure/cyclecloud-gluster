@@ -1,0 +1,12 @@
+[tendrl_server]
+<%= node['fqdn'] %>  ansible_user=<%= @user %>
+
+[gluster_servers]
+<% node['glusterfs']['fqdns'].each do |fqdn| %>
+<%= fqdn %>  ansible_user=<%= @user %>
+<% end %>
+
+[all:vars]
+etcd_ip_address=<%= node['ipaddress'] %>
+etcd_fqdn=<%= node['fqdn'] %>
+graphite_fqdn=<%= node['fqdn'] %>

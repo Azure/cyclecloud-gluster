@@ -7,7 +7,7 @@ default['glusterfs']['target_count'] = 4
 default['glusterfs']['live_count'] = 0
 
 default['glusterfs']['mount_point'] = '/mnt/gluster'
-
+default['glusterfs']['monitoring']['enabled'] = true
 # search 
 default['glusterfs']['default_mount']['mount_point'] = nil
 default['glusterfs']['default_mount']['hostnames'] = nil
