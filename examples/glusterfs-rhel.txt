@@ -1,0 +1,288 @@
+[cluster glusterfs]
+  Category = Filesystems
+  FormLayout = selectionpanel
+  [[node defaults]]
+
+    Credentials = $Credentials
+    Region = $Region
+    MachineType = Standard_D2_v3
+
+    KeypairLocation = ~/.ssh/cyclecloud.pem
+    SubnetId = $SubnetId
+
+    [[[configuration rhel.subscription]]]
+        username = $RhelSubUsername
+        password = $RhelSubPassword
+        pool = $RhelSubPool
+
+    [[[configuration]]]
+    cyclecloud.install_epel = false
+
+    [[node home]]
+        ImageName = cycle.image.centos7
+        MachineType = Standard_D4_v3
+
+    [[[cluster-init glusterfs:default:$GlusterFSProjectVersion]]]
+
+      [[[configuration]]]
+          run_list = recipe[cshared::directories],recipe[cuser],recipe[cshared::server],recipe[glusterfs::selinux]
+          cyclecloud.discoverable = true
+
+    [[node monitor]]
+      MachineType = Standard_D16s_v3
+      Azure.Publisher = RedHat
+      Azure.Offer = RHEL
+      Azure.Sku = 7-RAW
+      Azure.ImageVersion = latest
+
+      InstallJetpack = true
+      JetpackPlatform = centos-7
+      AwaitInstallation = true
+      ImageOs = linux
+
+        [[[cluster-init glusterfs:default:$GlusterFSProjectVersion]]]
+
+        [[[configuration]]]
+            run_list =  recipe[cshared::client],recipe[cuser],recipe[glusterfs::tendrl]
+            glusterfs.target_count = $ClusterSize
+
+        [[[volume carbon]]]
+            Size = 200
+            SSD = true
+            Mount = carbon
+
+        [[[configuration cyclecloud.mounts.carbon]]]
+            mountpoint = /var/lib/carbon
+            fs_type = ext4
+
+        [[[volume etcd]]]
+            Size = 200
+            SSD = true
+            Mount = etcd
+
+        [[[configuration cyclecloud.mounts.etcd]]]
+            mountpoint = /var/lib/etcd
+            fs_type = ext4
+
+    [[nodearray gluster]]
+      MachineType = $MachineType
+
+      Azure.Publisher = RedHat
+      Azure.Offer = RHEL
+      Azure.Sku = 7-RAW
+      Azure.ImageVersion = latest
+
+      InstallJetpack = true
+      JetpackPlatform = centos-7
+      AwaitInstallation = true
+      ImageOs = linux
+
+      InitialCount = $ClusterSize
+
+      AdditionalClusterInitSpecs = $GlusterClusterInitSpecs
+      
+        [[[configuration]]]
+        run_list = recipe[cshared::client],recipe[cuser],recipe[glusterfs::server]
+        cyclecloud.discoverable = true
+        glusterfs.target_count = $ClusterSize
+        glusterfs.volume.type = $GlusterVolumeType
+
+        [[[cluster-init glusterfs:default:$GlusterFSProjectVersion]]]
+        [[[cluster-init glusterfs:server-test:$GlusterFSProjectVersion]]]
+
+        [[[volume d0]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d1]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d2]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d3]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d4]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d5]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d6]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[volume d7]]]
+        Size = $VolSize
+        SSD = $UseSSD
+        Mount = ddrive
+
+        [[[configuration cyclecloud.mounts.ddrive]]]
+            mountpoint = /datadrive
+            fs_type = xfs
+            raid_level = 0
+
+    [[node proxy]]
+      IsReturnProxy = $ReturnProxy
+      MachineType = $ProxyMachineType
+      SubnetId = $SubnetId
+      ImageName = cycle.image.centos7
+
+      [[[configuration]]]
+        cyclecloud.discoverable = true
+
+      [[[network-interface eth0]]]
+      AssociatePublicIpAddress = $UsePublicNetwork
+
+      [[[input-endpoint ganglia]]]
+      PrivatePort = 8652
+      PublicPort = 8652
+
+
+[parameters Required Settings]
+Order = 10
+
+    [[parameters Cloud Service Provider Configuration]]
+    Description = Configure the Cloud Provider account options.
+    Order = 10
+
+        [[[parameter Region]]]
+        Label = Region
+        Description = Deployment Location
+        ParameterType = Cloud.Region
+
+    [[parameters Networking]]
+    Description = Networking settings
+    Order = 40
+
+        [[[parameter SubnetId]]]
+        Label = Subnet
+        Description = Subnet Resource Path (ResourceGroup/VirtualNetwork/Subnet)
+        Required = true
+        ParameterType = Azure.Subnet
+
+[parameters Advanced Settings]
+Order = 20
+
+    [[parameters Azure Settings]]
+    Order = 10 
+
+        [[[parameter Credentials]]]
+        Description = The credentials for the cloud provider
+        ParameterType = Cloud.Credentials
+
+    [[parameters Machine Configurations]]
+    Description = VM sizes for cluster
+    Order = 20
+
+      [[[parameter MachineType]]]
+      Label = GlusterFS Type
+      Description = VM Size for GlusterFS cluster nodes
+      DefaultValue = Standard_D8s_v3        
+      ParameterType = Cloud.MachineType
+
+    [[parameters GlusterFS Volume ]]
+    Description = Configurations for GlusterFS Volume.
+    Order = 30
+
+      [[[parameter ClusterSize]]]
+      Label = Cluster Size
+      Description = Node count for HighAvailability Master
+      DefaultValue = 4
+      Config.Plugin = pico.form.NumberTextBox
+      Config.MinValue = 2
+      Config.MaxValue = 24
+      Config.IntegerOnly = true
+
+      [[[parameter GlusterVolumeType]]]
+      Label = Gluster Volume Type
+      DefaultValue = replica
+      Config.Plugin = pico.form.Dropdown
+      [[[[list Config.Entries]]]]
+          Name = replica
+          Label = Replicated
+      [[[[list Config.Entries]]]]
+          Name = distributed
+          Label = Distributed
+      [[[[list Config.Entries]]]]
+          Name = stripe
+          Label = Striped
+
+      [[[parameter VolSize]]]
+      Label = Size (GB)
+      Description = FileServer Constituent RAID Volume Size (Count: 8)
+      DefaultValue = 200
+      Config.Plugin = pico.form.NumberTextBox
+      Config.MinValue = 20
+      Config.MaxValue = 4095
+      Config.IntegerOnly = true
+
+      [[[parameter UseSSD]]]
+      Label = SSD drives
+      DefaultValue = true
+      ParameterType = Boolean
+      Config.Label = Use Premium Managed Disks
+
+
+    [[parameters Software]]
+    Description = "Specify the scheduling software, and base OS installed on all nodes, and optionally the cluster-init and chef versions from your Locker."
+    Order = 20
+
+        [[[parameter GlusterClusterInitSpecs]]]
+        Label = Gluster Cluster-Init
+        DefaultValue = =undefined
+        Description = Cluster init specs to apply to the master node
+        ParameterType = Cloud.ClusterInitSpecs
+
+        [[[parameter GlusterFSProjectVersion]]]
+        Label = Project Version
+        Description = CycleCloud GlusterFS project version found in project.ini
+        DefaultValue = 1.0.0
+
+        [[[parameter RhelSubUsername]]]
+        Label = RHEL Username
+        Description = RedHat Subscription Username 
+
+        [[[parameter RhelSubPassword]]]
+        Label = RHEL Password
+        Description = RedHat Subscription Password
+        ParameterType = Password
+
+        [[[parameter RhelSubPool]]]
+        Label = RHEL Pool
+        Description = RedHat Subscription Pool
+
+    [[parameters Advanced Networking]]
+    Description = Advanced networking settings
+
+
+        [[[parameter ProxyMachineType]]]
+        Label = Proxy Type
+        Description = VM Size for Proxy Nodes
+        DefaultValue = Standard_D2_v3        
+        ParameterType = Cloud.MachineType
+
+        [[[parameter ReturnProxy]]]
+        Label = Return Proxy
+        DefaultValue = true
+        ParameterType = Boolean
+        Config.Label = Use SSH tunnel to connect to CycleCloud (required if direct access is blocked)
+
+        [[[parameter UsePublicNetwork]]]
+        Label = Public Proxy Node
+        DefaultValue = true
+        ParameterType = Boolean
+        Config.Label = Access proxy node from the Internet
