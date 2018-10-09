@@ -1,5 +1,5 @@
-include_recipe '::client_install'
-include_recipe '::client_search_gluster'
+include_recipe 'glusterfs::client_install'
+include_recipe 'glusterfs::client_search_gluster'
 
 chefstate = node[:cyclecloud][:chefstate]
 
