@@ -7,7 +7,7 @@
         ImageName = cycle.image.centos7
         KeyPairLocation = ~/.ssh/cyclecloud.pem
 
-    [[[cluster-init glusterfs:default:latest]]]
+    [[[cluster-init glusterfs:default:1.0.0]]]
 
     [[[configuration]]]
         run_list = recipe[glusterfs::client]
