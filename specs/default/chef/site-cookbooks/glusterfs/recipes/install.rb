@@ -5,7 +5,7 @@ bootstrap = node['cyclecloud']['bootstrap']
 include_recipe '::_rhel_subscription' if node['platform'] == "redhat"
 include_recipe '::_install_rhel' if node['platform'] == "redhat"
 
-package 'centos-release-gluster' do
+package 'centos-release-gluster312' do
   only_if { node['platform'] == 'centos' }
 end
 
