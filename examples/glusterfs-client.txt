@@ -1,6 +1,8 @@
 [cluster glusterfs-client]
   Category = Infrastructure
     [[node glusterfs-client]]
+        Credentials = $Credentials
+        Region = $Region
         IsReturnProxy = True
         MachineType = $MachineType
         SubnetId = $SubnetId
