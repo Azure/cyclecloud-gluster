@@ -1,5 +1,5 @@
-include_recipe '::client_install'
-include_recipe '::client_search_gluster'
+include_recipe 'glusterfs::client_install'
+include_recipe 'glusterfs::client_search_gluster'
 
 chefstate = node[:cyclecloud][:chefstate]
 
@@ -23,13 +23,23 @@ mounts.each do |name, mount|
   log "Randomly chose: #{ghost_prime}, from: #{mount['hostnames']}" do level :info end
   backup_nodes = ghosts.join(":")
 
-  mount_point =  mount['mount_point'].nil? ? "/mnt/#{name}" : mount['mount_point']
+  if mount['mountpoint'].nil?
+    if mount['mount_point'].nil?
+      mountpoint = "/mnt/#{name}"
+    else
+      Chef::Log.warn("Using deprecated gluster mount attribute \"mount_point\".  Prefer attribute name: \"mountpoint\"...")
+      mountpoint =  mount['mount_point']
+    end
+  else
+      mountpoint =  mount['mountpoint']
+  end
 
-  directory mount_point
-  mount mount_point do
+
+  directory mountpoint
+  mount mountpoint do
     device "#{ghost_prime}:/#{node['glusterfs']['volume']['name']}"
     fstype 'glusterfs'
     options "backup-volfile-servers=#{backup_nodes}"
-    not_if "mount | grep #{mount_point}"
+    not_if "mount | grep #{mountpoint}"
   end
 end

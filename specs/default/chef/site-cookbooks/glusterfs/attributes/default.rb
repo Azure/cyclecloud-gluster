@@ -6,10 +6,11 @@ default['glusterfs']['volume']['test']['deadline'] = 10
 default['glusterfs']['target_count'] = 4
 default['glusterfs']['live_count'] = 0
 
-default['glusterfs']['mount_point'] = '/mnt/gluster'
+default['glusterfs']['mountpoint'] = '/mnt/gluster'
 default['glusterfs']['monitoring']['enabled'] = true
+
 # search 
-default['glusterfs']['default_mount']['mount_point'] = nil
+default['glusterfs']['default_mount']['mountpoint'] = nil
 default['glusterfs']['default_mount']['hostnames'] = nil
 default['glusterfs']['default_mount']['reverse_hostnames'] = nil
 default['glusterfs']['default_mount']['role'] = nil
